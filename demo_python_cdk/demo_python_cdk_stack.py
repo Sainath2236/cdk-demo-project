@@ -3,7 +3,8 @@ from aws_cdk import (
     Stack,
     aws_sqs as sqs,
     aws_apigateway as apigateway,
-    aws_lambda as aws_lambda
+    aws_lambda as aws_lambda,
+    aws_dynamodb as dynamodb
 )
 from constructs import Construct
 import os
@@ -32,6 +33,11 @@ class DemoPythonCdkStack(Stack):
         write_product_integration = apigateway.LambdaIntegration(self.lambda_fn)
 
         products = self.products_api.root.add_resource("products")
-        products.add_method("GET", write_product_integration)
+        products.add_method("POST", write_product_integration)
 
+        products_table = dynamodb.Table(self, "ProductTabel",
+        partition_key=dynamodb.Attribute(name="product_code", type=dynamodb.AttributeType.STRING),
+        table_name="products"
+        )
+        products_table.grant_read_write_data(self.lambda_fn)
 
