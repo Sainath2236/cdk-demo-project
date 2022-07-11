@@ -12,7 +12,7 @@ class DemoPythonCdkStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        self.fin_cloud_sales_api = apigateway.RestApi(
+        self.products_api = apigateway.RestApi(
             self,
             "product-api",
             deploy=True,
@@ -31,9 +31,7 @@ class DemoPythonCdkStack(Stack):
         )
         write_product_integration = apigateway.LambdaIntegration(self.lambda_fn)
 
-        self.fin_cloud_sales_api.root.add_method(
-            'GET',
-            write_product_integration
-        )
+        products = self.products_api.root.add_resource("products")
+        products.add_method("GET", write_product_integration)
 
 

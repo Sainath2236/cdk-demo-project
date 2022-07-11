@@ -1,2 +1,2 @@
 def handler(event, _context):
-    return "Hello from lambda"
+    return {"body":"Hello from lambda", "statusCode": 200}
