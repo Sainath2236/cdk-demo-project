@@ -1,15 +1,37 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
+import pytest
 
 from demo_python_cdk.demo_python_cdk_stack import DemoPythonCdkStack
 
-# example tests. To run these tests, uncomment this file along with the example
-# resource in demo_python_cdk/demo_python_cdk_stack.py
-def test_sqs_queue_created():
+@pytest.fixture(scope="module", name="stack_template")
+def create_stack_template():
     app = core.App()
     stack = DemoPythonCdkStack(app, "demo-python-cdk")
-    template = assertions.Template.from_stack(stack)
+    return assertions.Template.from_stack(stack)
 
-#     template.has_resource_properties("AWS::SQS::Queue", {
-#         "VisibilityTimeout": 300
-#     })
+def test_products_rest_api__created(stack_template):
+    stack_template.has_resource_properties("AWS::ApiGateway::RestApi", {
+         "EndpointConfiguration": {
+                "Types": [
+                    "REGIONAL"
+                ]
+        },
+        "Name": "product-api"
+    })
+
+def test_products_lambda_created(stack_template):
+        stack_template.has_resource_properties("AWS::Lambda::Function", {
+            "FunctionName": "write-products-lambda-function",
+            "Handler": "index.handler",
+            "Runtime": "python3.7"
+})
+
+def test_products_dynamo__table_created(stack_template):
+        stack_template.has_resource_properties("AWS::DynamoDB::Table", {
+                "AttributeDefinitions": [{
+                            "AttributeName": "product_code",
+                            "AttributeType": "S"
+                            }],
+                "TableName": "products"
+})
